@@ -1,43 +1,48 @@
 <!doctype html>
 <head>
-<title>Hangman</title>
+<title>Question and Answers</title>
 <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 </head>
 <body>
 
-<div>Word: <span id="pattern"></span></div>
-<div>Guesses: <span id="oldGuesses"></span></div>
-<div>Letter? <input id="newGuesses" type="text" />
+<div>Question: <span id="question"></span></div>
+<div><input id="answer" type="text" />
              <button id="submit">Submit</button></div>
-<div id="fail"></div>
+<div id="feedback"></div>
 
 <script>
-function guess() {
-  var oldPattern = $("#pattern").text();
-  var oldGuesses = $("#oldGuesses").text();
-  var newGuesses = $("#newGuesses").val();
-  $.get("/rest/match",
-        { oldPattern: oldPattern, oldGuesses: oldGuesses, newGuesses: newGuesses },
-        function(newPattern) {
-          $("#pattern").text(newPattern);
-          $("#oldGuesses").append(newGuesses);
-          $("#newGuesses").val("");
-          $("#newGuesses").focus();
+function check(){
+  var question = $("#question").text();
+  var answer = $("#answer").val();
+  $.get("/rest/testanswer",
+        { question: question, answer: answer},
+        function(feedback) {
+          $("#feedback").text(feedback);
+          $("#answer").val("");
+          $("#answer").focus();
         })
    .fail(function(jqXHR, textStatus, errorThrown) {
-           $("#fail").text(textStatus + ": " + errorThrown);
+           $("#feedback").text(textStatus + ": " + errorThrown);
          });
-};
+         $(function() {
+  $.get("/rest/randomquestion",
+	        function(thequestion) {
+	          $("#question").text(thequestion);
+	          $("#submit").click(check);
+	          $("#answer").focus();
+	        });
+	});
+         
+}
 
 $(function() {
-  $.get("/rest/start",
-        function(thestart) {
-          $("#pattern").text(thestart);
-          $("#submit").click(guess);
-          $("#newGuesses").focus();
+  $.get("/rest/randomquestion",
+        function(thequestion) {
+          $("#question").text(thequestion);
+          $("#submit").click(check);
+          $("#answer").focus();
         });
 });
 </script>
-
 </body>
 </html>
